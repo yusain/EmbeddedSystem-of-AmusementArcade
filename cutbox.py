@@ -52,18 +52,16 @@ from email import message
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import time
 import sys
+import json
 from turtle import delay
 from unittest import result
 HOST = "192.168.1.101"
 PORT = 9999
-print(ticket)
 timestamp = 1653457092123
-source = {
-    "_id": 123456789,
-    "count": ticket,
-    "qrcode":"https://dtgvm.cmindline.com/api/getMember?token=1LznBK1g7G4o18FdO20gutwHYaOWhhZfG3TUBwJMwlySfT86G-2img"
- }
-
+with open('cutbox.json','r',encoding='utf-8') as file:
+    json_string = json.load(file)
+json_string['source1']['count'] = ticket
+json_string['source2']['count'] = ticket
 class NeuralHttp(BaseHTTPRequestHandler):
     def do_GET(self):
         if change == "a":
@@ -72,19 +70,14 @@ class NeuralHttp(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes('{\n\t"event": "ticketQRcode",\n', "utf-8"))
             self.wfile.write(bytes('\t"timestamp": "'+str(timestamp) +'",\n', "utf-8"))
-            self.wfile.write(bytes('\t"source": {\n', "utf-8"))
-            self.wfile.write(bytes('\t\t"_id": '+ str(source["_id"])+',\n', "utf-8"))
-            self.wfile.write(bytes('\t\t"count": '+ str(source["count"])+',\n', "utf-8"))
-            self.wfile.write(bytes('\t\t"qrcode ": "'+ source["qrcode"]+'"\n\t}\n}', "utf-8"))
+            self.wfile.write(bytes('\t"source": '+ str(json_string['source1'])+'\n}', "utf-8"))
         if change == "b":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(bytes('{\n\t"event": "ticketThermalpaper",\n', "utf-8"))
             self.wfile.write(bytes('\t"timestamp": "'+str(timestamp) +'",\n', "utf-8"))
-            self.wfile.write(bytes('\t"source": {\n', "utf-8"))
-            self.wfile.write(bytes('\t\t"_id": '+ str(source["_id"])+',\n', "utf-8"))
-            self.wfile.write(bytes('\t\t"count": '+ str(source["count"])+'"\n\t}\n}', "utf-8"))
+            self.wfile.write(bytes('\t"source": '+ str(json_string['source2'])+'\n}', "utf-8"))
 
     def do_POST(self):
         self.send_response(200)
