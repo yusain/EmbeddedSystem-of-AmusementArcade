@@ -1,0 +1,42 @@
+{
+    "查詢單一機台資訊": {
+        "return": 0,
+        "message": "Success",
+        "result": 
+        {
+            "id": 123456789,
+            "hwid": "B33585AE",
+            "vendorHwid": 600031,
+            "description": "裁票機",
+            "locate": "中山店",
+            "model": "alfabox_v2_wifi"
+        }
+    },
+    "裁票機開/關機": {
+        "events": "ticketPower",
+        "timestamp": 1653457092123,
+        "source":
+        {
+            "_id": 123456789,
+            "position": false
+        }
+    },
+    "會員加點(QR Code)": {
+        "events": "ticketQRcode",
+        "timestamp": 1653457092123,
+        "source": 
+        {
+            "_id": 123456789,
+            "count":100,
+        "qrcode":"https://dtgvm.cmindline.com/api/getMember?token=1LznBK1g7G4o18FdO20gutwHYaOWhhZfG3TUBwJMwlySfT86G-2img"
+        }
+    },
+    "非會員加點(熱感紙)":{
+        "events": "ticketThermalpaper",
+        "timestamp": 1653457092123,
+        "source": {
+            "_id": 123456789,
+            "count":100
+        }
+    } 
+}
