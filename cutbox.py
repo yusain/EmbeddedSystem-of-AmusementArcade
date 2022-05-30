@@ -58,26 +58,24 @@ from unittest import result
 HOST = "192.168.1.101"
 PORT = 9999
 timestamp = 1653457092123
+#-------讀取json檔的資料----------------------------------------
 with open('cutbox.json','r',encoding='utf-8') as file:
-    json_string = json.load(file)
-json_string['source1']['count'] = ticket
-json_string['source2']['count'] = ticket
+    cutbox_string = json.load(file)
+cutbox_string['會員加點(QR Code)']['source']['count'] = ticket
+cutbox_string['非會員加點(熱感紙)']['source']['count'] = ticket
+#------------------------------------------------------------
 class NeuralHttp(BaseHTTPRequestHandler):
     def do_GET(self):
         if change == "a":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(bytes('{\n\t"event": "ticketQRcode",\n', "utf-8"))
-            self.wfile.write(bytes('\t"timestamp": "'+str(timestamp) +'",\n', "utf-8"))
-            self.wfile.write(bytes('\t"source": '+ str(json_string['source1'])+'\n}', "utf-8"))
+            self.wfile.write(bytes(str(cutbox_string['會員加點(QR Code)']), "utf-8"))
         if change == "b":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(bytes('{\n\t"event": "ticketThermalpaper",\n', "utf-8"))
-            self.wfile.write(bytes('\t"timestamp": "'+str(timestamp) +'",\n', "utf-8"))
-            self.wfile.write(bytes('\t"source": '+ str(json_string['source2'])+'\n}', "utf-8"))
+            self.wfile.write(bytes(str(cutbox_string['非會員加點(熱感紙)']), "utf-8"))
 
     def do_POST(self):
         self.send_response(200)
