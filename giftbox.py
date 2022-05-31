@@ -223,6 +223,16 @@ def goend():
    global last_ticket
    global total_ticket
    if last_ticket >= 0 and total_ticket > 0:
+      global box1_ticket_end_buy
+      global box2_ticket_end_buy
+      global box3_ticket_end_buy
+   
+      box1_ticket_end_buy = 0
+      box1_amount_bug.config(text=0)
+      box2_ticket_end_buy = 0
+      box2_amount_bug.config(text=0)
+      box3_ticket_end_buy = 0
+      box3_amount_bug.config(text=0)
       myticket = last_ticket
       ticket.config(text=myticket)
       total_ticket_buy_end.config(text=0)

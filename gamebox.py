@@ -6,9 +6,9 @@ from tkinter import ttk
 #--------------機台一號--------------------
 coin1 = 0
 startbox_1 = 0
+coinall = 0
 def startbox1():
     global startbox_1
-    startbox_1+=0
     if startbox_1 == 0 :
         startbox_1 = 1
         game1_box.config(bg="#33CCFF")
@@ -25,12 +25,14 @@ def coin1add(): #投幣
 def coin1sub(): #玩一場
     global coin1
     global startbox_1
+    global coinall
     ticket1 = random.randrange(1, 100)
     if startbox_1 == 1 :
         if coin1 >= 2 :
             coin1-=2
             game1_coin.config(text=coin1)
             game1_ticket.config(text=ticket1)
+            coinall += 2
 
 def coin1break(): #退幣
     global coin1
@@ -60,13 +62,14 @@ def coin2add(): #投幣
 def coin2sub(): #玩一場
     global coin2
     global startbox_2
+    global coinall
     ticket2 = random.randrange(1, 100)
     if startbox_2 == 1 :
         if coin2 >= 2 :
             coin2-=2
             game2_coin.config(text=coin2)
             game2_ticket.config(text=ticket2)
-
+            coinall += 2
 def coin2break(): #退幣
     global coin2
     global startbox_2
@@ -96,12 +99,14 @@ def coin3add(): #投幣
 def coin3sub(): #玩一場
     global coin3
     global startbox_3
+    global coinall
     ticket3 = random.randrange(1, 100)
     if startbox_3 == 1 :
         if coin3 >= 3 :
             coin3-=3
             game3_coin.config(text=coin3)
             game3_ticket.config(text=ticket3)
+            coinall += 3
 
 def coin3break(): #退幣
     global coin3
@@ -132,13 +137,14 @@ def coin4add(): #投幣
 def coin4sub(): #玩一場
     global coin4
     global startbox_4
+    global coinall
     ticket4 = random.randrange(1, 100)
     if startbox_4 == 1 :
         if coin4 >= 4 :
             coin4-=4
             game4_coin.config(text=coin4)
             game4_ticket.config(text=ticket4)
-
+            coinall += 4
 def coin4break(): #退幣
     global coin4
     global startbox_4
@@ -174,12 +180,14 @@ def coin5add(): #投幣
 def coin5sub(): #玩一場
     global coin5
     global startbox_5
+    global coinall
     ticket5 = random.randrange(1, 100)
     if startbox_5 == 1 :
         if coin5 >= 5 :
             coin5-=5
             game5_coin.config(text=coin5)
             game5_ticket.config(text=ticket5)
+            coinall += 5
 
 def coin5break(): #退幣
     global coin5
@@ -268,16 +276,42 @@ game5_start.grid(row=5, column=3,columnspan=1,sticky=tk.E+tk.W+tk.N+tk.S)
 game5_break.grid(row=5, column=4,columnspan=1,sticky=tk.E+tk.W+tk.N+tk.S)
 game5_ticket.grid(row=5, column=5,columnspan=1,sticky=tk.E+tk.W)
 
-
-
-
-
-
-
-
-
-
-
-
-
 win.mainloop()
+
+
+#-------------------------------------------------
+from email import message
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import time
+import sys
+import json
+from turtle import delay
+from unittest import result
+HOST = "192.168.1.101"
+PORT = 9999
+
+#--------------------------------------------------------
+with open('gamebox.json','r',encoding='utf-8') as file:
+    gamebox_string = json.load(file)
+gamebox_string['要求遠端投/退幣']['results']['count'] = coinall 
+# ---------------------------------------------------
+
+class NeuralHttp(BaseHTTPRequestHandler):
+    def do_GET(self):
+#-------查詢單一機台資訊----------------------------------------
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+#-------要求遠端開/關機----------------------------------------
+    def do_POST(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(bytes(str(gamebox_string['要求遠端投/退幣']), "utf-8"))
+
+server = HTTPServer((HOST, PORT), NeuralHttp)
+print ("Server now running...")
+server.serve_forever()
+server.server_close()
+print ("Server stopped...")
+
