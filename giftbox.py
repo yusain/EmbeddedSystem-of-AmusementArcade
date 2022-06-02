@@ -1,9 +1,26 @@
 import tkinter as tk 
 import tkinter.font as tkFont
 import random
+import http.client
+import pprint
+import json
+import sys
+import requests
+
+#設定
+conn = http.client.HTTPConnection("192.168.1.112", port=9999) 
+headers = {'Content-type': 'application/json'}
 
 #--------隱藏登入顯示票數和禮品-------------------------------------------
 def ok():
+   #包裝
+   foo = {'登入狀況':'登入'}
+   json_data = json.dumps(foo)
+   #格式
+   conn.request('POST', '/post', json_data, headers)
+   r1 = conn.getresponse()
+   print(r1.read().decode())   
+   conn.close()
    #隱藏開始鍵
    start_button.place_forget()
    break_start_button.grid(row=0, column=0,columnspan=2,sticky=tk.E+tk.W)
@@ -52,6 +69,14 @@ def ok():
 #--------返回登入畫面-----------------------------
 def gostart():
 
+   #包裝
+   foo = {'登入狀況':'登出'}
+   json_data = json.dumps(foo)
+   #格式
+   conn.request('POST', '/post', json_data, headers)
+   r1 = conn.getresponse()
+   print(r1.read().decode())   
+   conn.close()
    total_ticket_buy_end.config(text=0)
    global myticket
    ticket_last.config(text=myticket)
@@ -222,23 +247,36 @@ def goend():
    global myticket
    global last_ticket
    global total_ticket
+   global box1_ticket_end_buy
+   global box2_ticket_end_buy
+   global box3_ticket_end_buy
+
+   box1_ticket_end_buy = 0
+   box1_amount_bug.config(text=0)
+   box2_ticket_end_buy = 0
+   box2_amount_bug.config(text=0)
+   box3_ticket_end_buy = 0
+   box3_amount_bug.config(text=0)
    if last_ticket >= 0 and total_ticket > 0:
-      global box1_ticket_end_buy
-      global box2_ticket_end_buy
-      global box3_ticket_end_buy
-   
-      box1_ticket_end_buy = 0
-      box1_amount_bug.config(text=0)
-      box2_ticket_end_buy = 0
-      box2_amount_bug.config(text=0)
-      box3_ticket_end_buy = 0
-      box3_amount_bug.config(text=0)
+      global box1_box
+      global box1_box_amount
+      global box2_box
+      global box2_box_amount
+      global box3_box
+      global box3_box_amount
+      #包裝
+      foo = {'彩票數量狀況':'使用了{}張彩票'.format(total_ticket),'禮品一號':'減少{}'.format(box1_box_amount),'禮品二號':'減少{}'.format(box2_box_amount),'禮品三號':'減少{}'.format(box3_box_amount)}
+      json_data = json.dumps(foo)
+      #格式
+      conn.request('POST', '/post', json_data, headers)
+      r1 = conn.getresponse()
+      print(r1.read().decode())   
+      conn.close()
+      total_ticket = 0
       myticket = last_ticket
       ticket.config(text=myticket)
       total_ticket_buy_end.config(text=0)
       #禮品一號
-      global box1_box
-      global box1_box_amount
       box1_box-=box1_box_amount
       box1_amount.config(text=box1_box)
       #-----重置禮品數，所需票數-----------
@@ -246,8 +284,6 @@ def goend():
       box1_amount_bug.config(text=box1_box_amount)
       box1_ticket_bug_end.config(text=0)
       #禮品二號
-      global box2_box
-      global box2_box_amount
       box2_box-=box2_box_amount
       box2_amount.config(text=box2_box)
       #-----重置禮品數，所需票數-----------
@@ -255,14 +291,13 @@ def goend():
       box2_amount_bug.config(text=box2_box_amount)
       box2_ticket_bug_end.config(text=0)
       #禮品三號
-      global box3_box
-      global box3_box_amount
       box3_box-=box3_box_amount
       box3_amount.config(text=box3_box)
       #-----重置禮品數所需票數-----------
       box3_box_amount = 0
       box3_amount_bug.config(text=box3_box_amount)
       box3_ticket_bug_end.config(text=0)
+      
       #結算畫面隱藏
       break_start_button.grid_forget()
       change_button.grid_forget()

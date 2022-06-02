@@ -1,26 +1,34 @@
-# 這是有會員加點(QR Code)與非會員加點(熱感紙)的功能
-from operator import truediv
-import tkinter as tk
+import tkinter as tk 
 import tkinter.font as tkFont
-
+import http.client
+import pprint
+import json
+import sys
+import requests
 win = tk.Tk()
 win.geometry("1000x450+200+50")
 win.minsize(width=1000,height=450)
 win.maxsize(width=1000,height=450)
-win.title("cutbox")
 win.config(bg="#CCEEFF")
-ticket = 0
+#設定
+conn = http.client.HTTPConnection("192.168.1.112", port=9999) 
+headers = {'Content-type': 'application/json'}
+
 #-------副函式--------------------------
 def ok():
     t = ticket_entry.get()
-    global ticket
-    ticket = t
-    #source["count"] = t
     if t == "" :
         ticket_amount.config(text=0)
     else :
         ticket_amount.config(text=t)
-
+        #包裝
+        foo = {'裁票量':'{}'.format(t)}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 
 #--------參數---------------------------
 ticket_access = 0
@@ -40,52 +48,14 @@ ticket_entry.grid(row=0, column=1)
 ticket_name.grid(row=1, column=0)
 ticket_amount.grid(row=1, column=1)
 printf_button.grid(row=2, column=0,columnspan=2)
-#輸入你要的模式
-change = input("你是Line會員嗎，是請按a，不是請按b: ")
+
+#包裝
+foo = {'麻煩':'開機'}
+json_data = json.dumps(foo)
+#格式
+conn.request('POST', '/post', json_data, headers)
+r1 = conn.getresponse()
+print(r1.read().decode())   
+conn.close()
+
 win.mainloop()
-
-
-
-
-#--------------------------------------------------
-from email import message
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import time
-import sys
-import json
-from turtle import delay
-from unittest import result
-HOST = "192.168.1.101"
-PORT = 9999
-timestamp = 1653457092123
-#-------讀取json檔的資料----------------------------------------
-with open('cutbox.json','r',encoding='utf-8') as file:
-    cutbox_string = json.load(file)
-cutbox_string['會員加點(QR Code)']['source']['count'] = ticket
-cutbox_string['非會員加點(熱感紙)']['source']['count'] = ticket
-#------------------------------------------------------------
-class NeuralHttp(BaseHTTPRequestHandler):
-    def do_GET(self):
-        if change == "a":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(bytes(str(cutbox_string['會員加點(QR Code)']), "utf-8"))
-        if change == "b":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(bytes(str(cutbox_string['非會員加點(熱感紙)']), "utf-8"))
-
-    def do_POST(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        
-server = HTTPServer((HOST, PORT), NeuralHttp)
-print ("Server now running...")
-server.serve_forever()
-server.server_close()
-print ("Server stopped...")
-
-

@@ -2,43 +2,92 @@ import tkinter as tk
 import tkinter.font as tkFont
 import random
 from tkinter import ttk
+import http.client
+import pprint
+import json
+import sys
+import requests
+
+
+#設定
+conn = http.client.HTTPConnection("192.168.1.112", port=9999) 
+headers = {'Content-type': 'application/json'}
 
 #--------------機台一號--------------------
 coin1 = 0
 startbox_1 = 0
-coinall = 0
 def startbox1():
     global startbox_1
+    startbox_1+=0
     if startbox_1 == 0 :
         startbox_1 = 1
         game1_box.config(bg="#33CCFF")
+        #包裝
+        foo = {'1號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
     else :
         startbox_1 = 0
         game1_box.config(bg="#FFBB66")
+        #包裝
+        foo = {'1號':'關機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 def coin1add(): #投幣
     global coin1
     global startbox_1
     if startbox_1 == 1 : 
         coin1+=1
         game1_coin.config(text=coin1)
+        #包裝
+        foo = {'1號':'投幣'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 
 def coin1sub(): #玩一場
     global coin1
     global startbox_1
-    global coinall
     ticket1 = random.randrange(1, 100)
     if startbox_1 == 1 :
         if coin1 >= 2 :
             coin1-=2
             game1_coin.config(text=coin1)
             game1_ticket.config(text=ticket1)
-            coinall += 2
+            #包裝
+            foo = {'1號':'獲得彩票{}'.format(ticket1)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
+            
 
 def coin1break(): #退幣
     global coin1
     global startbox_1
     if startbox_1 == 1 :
         if coin1 > 0 :
+            #包裝
+            foo = {'1號':'退幣{}'.format(coin1)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
             coin1 = 0
             game1_coin.config(text=coin1)
 #--------------機台二號--------------------
@@ -49,32 +98,72 @@ def startbox2():
     if startbox_2 == 0 :
         startbox_2 = 1
         game2_box.config(bg="#CCEEFF")
+        #包裝
+        foo = {'2號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
     else :
         startbox_2 = 0
         game2_box.config(bg="#FFBB66")
+        #包裝
+        foo = {'2號':'關機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 def coin2add(): #投幣
     global coin2
     global startbox_2
     if startbox_2 == 1 : 
         coin2+=1
         game2_coin.config(text=coin2)
+        #包裝
+        foo = {'2號':'投幣'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 
 def coin2sub(): #玩一場
     global coin2
     global startbox_2
-    global coinall
     ticket2 = random.randrange(1, 100)
     if startbox_2 == 1 :
         if coin2 >= 2 :
             coin2-=2
             game2_coin.config(text=coin2)
             game2_ticket.config(text=ticket2)
-            coinall += 2
+            #包裝
+            foo = {'2號':'獲得彩票{}'.format(ticket2)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
+            
+
 def coin2break(): #退幣
     global coin2
     global startbox_2
     if startbox_2 == 1 :
         if coin2 > 0 :
+            #包裝
+            foo = {'2號':'退幣{}'.format(coin2)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
             coin2 = 0
             game2_coin.config(text=coin2)
 
@@ -86,33 +175,71 @@ def startbox3():
     if startbox_3 == 0 :
         startbox_3 = 1
         game3_box.config(bg="#33CCFF")
+        #包裝
+        foo = {'3號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
     else :
         startbox_3 = 0
         game3_box.config(bg="#FFBB66")
+        #包裝
+        foo = {'3號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 def coin3add(): #投幣
     global coin3
     global startbox_3
     if startbox_3 == 1 : 
         coin3+=1
         game3_coin.config(text=coin3)
+        #包裝
+        foo = {'3號':'投幣'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 
 def coin3sub(): #玩一場
     global coin3
     global startbox_3
-    global coinall
     ticket3 = random.randrange(1, 100)
     if startbox_3 == 1 :
-        if coin3 >= 3 :
-            coin3-=3
+        if coin3 >= 2 :
+            coin3-=2
             game3_coin.config(text=coin3)
             game3_ticket.config(text=ticket3)
-            coinall += 3
+            #包裝
+            foo = {'3號':'獲得彩票{}'.format(ticket3)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
 
 def coin3break(): #退幣
     global coin3
     global startbox_3
     if startbox_3 == 1 :
         if coin3 > 0 :
+            #包裝
+            foo = {'3號':'退幣{}'.format(coin3)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
             coin3 = 0
             game3_coin.config(text=coin3)
 
@@ -124,32 +251,71 @@ def startbox4():
     if startbox_4 == 0 :
         startbox_4 = 1
         game4_box.config(bg="#CCEEFF")
+        #包裝
+        foo = {'4號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
     else :
         startbox_4 = 0
         game4_box.config(bg="#FFBB66")
+        #包裝
+        foo = {'4號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 def coin4add(): #投幣
     global coin4
     global startbox_4
     if startbox_4 == 1 : 
         coin4+=1
         game4_coin.config(text=coin4)
+        #包裝
+        foo = {'4號':'投幣'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 
 def coin4sub(): #玩一場
     global coin4
     global startbox_4
-    global coinall
     ticket4 = random.randrange(1, 100)
     if startbox_4 == 1 :
-        if coin4 >= 4 :
-            coin4-=4
+        if coin4 >= 2 :
+            coin4-=2
             game4_coin.config(text=coin4)
             game4_ticket.config(text=ticket4)
-            coinall += 4
+            #包裝
+            foo = {'4號':'獲得彩票{}'.format(ticket4)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
+
 def coin4break(): #退幣
     global coin4
     global startbox_4
     if startbox_4 == 1 :
         if coin4 > 0 :
+            #包裝
+            foo = {'4號':'退幣{}'.format(coin4)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
             coin4 = 0
             game4_coin.config(text=coin4)
 
@@ -167,33 +333,71 @@ def startbox5():
     if startbox_5 == 0 :
         startbox_5 = 1
         game5_box.config(bg="#33CCFF")
+        #包裝
+        foo = {'5號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
     else :
         startbox_5 = 0
         game5_box.config(bg="#FFBB66")
+        #包裝
+        foo = {'5號':'開機'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 def coin5add(): #投幣
     global coin5
     global startbox_5
     if startbox_5 == 1 : 
         coin5+=1
         game5_coin.config(text=coin5)
+        #包裝
+        foo = {'5號':'投幣'}
+        json_data = json.dumps(foo)
+        #格式
+        conn.request('POST', '/post', json_data, headers)
+        r1 = conn.getresponse()
+        print(r1.read().decode())   
+        conn.close()
 
 def coin5sub(): #玩一場
     global coin5
     global startbox_5
-    global coinall
     ticket5 = random.randrange(1, 100)
     if startbox_5 == 1 :
-        if coin5 >= 5 :
-            coin5-=5
+        if coin5 >= 2 :
+            coin5-=2
             game5_coin.config(text=coin5)
             game5_ticket.config(text=ticket5)
-            coinall += 5
+            #包裝
+            foo = {'5號':'獲得彩票{}'.format(ticket5)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
 
 def coin5break(): #退幣
     global coin5
     global startbox_5
     if startbox_5 == 1 :
         if coin5 > 0 :
+            #包裝
+            foo = {'5號':'退幣{}'.format(coin5)}
+            json_data = json.dumps(foo)
+            #格式
+            conn.request('POST', '/post', json_data, headers)
+            r1 = conn.getresponse()
+            print(r1.read().decode())   
+            conn.close()
             coin5 = 0
             game5_coin.config(text=coin5)
 
@@ -276,42 +480,16 @@ game5_start.grid(row=5, column=3,columnspan=1,sticky=tk.E+tk.W+tk.N+tk.S)
 game5_break.grid(row=5, column=4,columnspan=1,sticky=tk.E+tk.W+tk.N+tk.S)
 game5_ticket.grid(row=5, column=5,columnspan=1,sticky=tk.E+tk.W)
 
+
+
+
+
+
+
+
+
+
+
+
+
 win.mainloop()
-
-
-#-------------------------------------------------
-from email import message
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import time
-import sys
-import json
-from turtle import delay
-from unittest import result
-HOST = "192.168.1.101"
-PORT = 9999
-
-#--------------------------------------------------------
-with open('gamebox.json','r',encoding='utf-8') as file:
-    gamebox_string = json.load(file)
-gamebox_string['要求遠端投/退幣']['results']['count'] = coinall 
-# ---------------------------------------------------
-
-class NeuralHttp(BaseHTTPRequestHandler):
-    def do_GET(self):
-#-------查詢單一機台資訊----------------------------------------
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-#-------要求遠端開/關機----------------------------------------
-    def do_POST(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(bytes(str(gamebox_string['要求遠端投/退幣']), "utf-8"))
-
-server = HTTPServer((HOST, PORT), NeuralHttp)
-print ("Server now running...")
-server.serve_forever()
-server.server_close()
-print ("Server stopped...")
-

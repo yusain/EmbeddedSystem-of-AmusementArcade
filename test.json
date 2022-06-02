@@ -1,0 +1,14 @@
+{
+    "遊戲機出彩票": {
+        "events": "gameTicket",
+        "timestamp": 1653457092123,
+        "source": {
+        "_id": 123456789,
+        "count": 2,
+        "outputPort":1,
+       "offline": false
+        } 
+       }
+       
+       
+}
