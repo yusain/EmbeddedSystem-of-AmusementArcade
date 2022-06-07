@@ -10,7 +10,7 @@ import requests
 
 
 #設定
-conn = http.client.HTTPConnection("192.168.1.112", port=9999) 
+conn = http.client.HTTPConnection("d2e8-60-248-161-128.jp.ngrok.io", port=3000) 
 headers = {'Content-type': 'application/json'}
 
 #--------------機台一號--------------------

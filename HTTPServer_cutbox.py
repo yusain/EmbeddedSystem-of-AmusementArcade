@@ -5,7 +5,7 @@ import sys
 import json
 from turtle import delay
 from unittest import result
-HOST = "192.168.1.101"
+HOST = "163.13.133.182"
 PORT = 9999
 
 ##-------獨處json檔的資料----------------------------------------

@@ -6,9 +6,8 @@ import pprint
 import json
 import sys
 import requests
-
 #設定
-conn = http.client.HTTPConnection("192.168.1.112", port=9999) 
+conn = http.client.HTTPConnection("163.13.133.185", port=80) 
 headers = {'Content-type': 'application/json'}
 
 #--------隱藏登入顯示票數和禮品-------------------------------------------

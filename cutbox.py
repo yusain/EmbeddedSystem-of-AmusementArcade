@@ -11,7 +11,7 @@ win.minsize(width=1000,height=450)
 win.maxsize(width=1000,height=450)
 win.config(bg="#CCEEFF")
 #設定
-conn = http.client.HTTPConnection("192.168.1.112", port=9999) 
+conn = http.client.HTTPConnection("163.13.133.185", port=80) 
 headers = {'Content-type': 'application/json'}
 
 #-------副函式--------------------------

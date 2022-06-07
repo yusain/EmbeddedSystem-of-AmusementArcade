@@ -5,23 +5,23 @@ import sys
 import json
 from turtle import delay
 from unittest import result
-import urllib
-HOST = "192.168.1.112" #http://192.168.1.112:9999/
-PORT = 9999
+HOST = "163.13.133.185"   
+PORT = 80
+#http://163.13.133.185:9999/
 
 # ---------------------------------------------------   
 class NeuralHttp(BaseHTTPRequestHandler):
     def do_GET(self):
 #-------查詢單一機台資訊-裁票機----------------------------------------
-        if self.path == "/request/cutbox/state":
-            with open('config_data.json','r',encoding='utf-8') as file:
-                cutbox_string = json.load(file)
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(bytes(str(cutbox_string['查詢單一機台資訊-裁票機']), "utf-8"))
+        #if self.path == "/request/cutbox/state":
+        #    with open('config_data.json','r',encoding='utf-8') as file:
+        #        cutbox_string = json.load(file)
+        #    self.send_response(200)
+        #    self.send_header("Content-Type", "application/json")
+        #    self.end_headers()
+        #    self.wfile.write(bytes(str(cutbox_string['查詢單一機台資訊-裁票機']), "utf-8"))
 #-------查詢單一機台資訊-遊戲機---------------------------------------------
-        elif self.path == "/request/gamebox/state": #這是PORT之後的子網域
+        if self.path == "/request/state": #這是PORT之後的子網域
             with open('config_data.json','r',encoding='utf-8') as file:
                 cutbox_string = json.load(file)
             self.send_response(200)
@@ -29,13 +29,13 @@ class NeuralHttp(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes(str(cutbox_string['查詢單一機台資訊-遊戲機']), "utf-8"))
 #-------查詢單一機台資訊-禮品機---------------------------------------------
-        elif self.path == "/request/giftbox/state": #這是PORT之後的子網域
-            with open('config_data.json','r',encoding='utf-8') as file:
-                cutbox_string = json.load(file)
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(bytes(str(cutbox_string['查詢單一機台資訊-禮品機']), "utf-8"))
+       #elif self.path == "/request/giftbox/state": #這是PORT之後的子網域
+       #    with open('config_data.json','r',encoding='utf-8') as file:
+       #        cutbox_string = json.load(file)
+       #    self.send_response(200)
+       #    self.send_header("Content-Type", "application/json")
+       #    self.end_headers()
+       #    self.wfile.write(bytes(str(cutbox_string['查詢單一機台資訊-禮品機']), "utf-8"))
 #-------用來測試資料---------------------------------------------
         elif self.path == "/post/test":
             with open('test.json','r',encoding='utf-8') as file:
@@ -46,8 +46,7 @@ class NeuralHttp(BaseHTTPRequestHandler):
                 print(cutbox_string)
     def do_POST(self):
 #-------單純接受資料---------------------------------------------
-        if self.path == "/post":
-            print(sys.getdefaultencoding())   
+        if self.path == "/post": 
             self.data_string = self.rfile.read(int(self.headers['Content-Length'])).decode(encoding='utf-8')
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
