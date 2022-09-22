@@ -1,14 +1,50 @@
 {
-    "遊戲機出彩票": {
-        "events": "gameTicket",
+  "查詢單一機台資訊-遊戲機": {
+    "code": " Success ",
+    "message": "ok",
+    "results": {
+      "vendorHwid": "dj12300105",
+      "description": "東海龍珠",
+      "model": "遊戲機",
+      "locate": "淡水店"
+    }
+  },
+  "要求遠端開/關機": {
+    "code": " Success ",
+    "message": "ok",
+    "results": {}
+  },
+  "要求遠端投/退幣": {
+    "code": " Success ",
+    "message": "ok",
+    "results": {
+      "ack": 1
+    }
+  },
+  "MachineCoinVote": {
+    "events": [
+      {
+        "type": "coinPulse",
         "timestamp": 1653457092123,
         "source": {
-        "_id": 123456789,
-        "count": 2,
-        "outputPort":1,
-       "offline": false
-        } 
-       }
-       
-       
+          "vendorHwid ": "dj12300105",
+          "count": 11364,
+          "inputPortId": 1,
+          "offline": false
+        }
+      }
+    ]
+  },
+  "webhook": {
+    "events": [{
+    "type":"coinPulse",
+    "timestamp": 1653457092123,
+    "source": {
+      "vendorHwid ": "dj12300105",
+      "count": 1,
+      "inputPortId":1,
+        "offline":false
+      } 
+    }]
+  }
 }

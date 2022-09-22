@@ -1,32 +1,50 @@
 {
-    "查詢單一機台資訊":{
-        "return": 0,
-        "message": "Success",
-        "results": {
-            "_id": 123456789,
-            "hwid": "B33585AE",
-            "vendorHwid": "600030",
-            "description": "水果炸翻天-右",
-            "locate": "中山店",
-            "model": "alfabox_v2_wifi"
-        } 
+    "查詢單一機台資訊-遊戲機": {
+      "code": " Success ",
+      "message": "ok",
+      "results": {
+        "vendorHwid": "dj12300105",
+        "description": "東海龍珠",
+        "model": "遊戲機",
+        "locate": "淡水店"
+      }
+    },
+    "要求遠端開/關機": {
+      "code": " Success ",
+      "message": "ok",
+      "results": {}
     },
     "要求遠端投/退幣": {
-        "return": 0,
-        "message": "Success",
-        "results": {
-            "_id": 123456789,
-            "count": 2,
-            "outputPort":1
-        } 
+      "code": " Success ",
+      "message": "ok",
+      "results": {
+        "ack": 1
+      }
     },
-    "要求遠端開/關機":{
-        "return": 0,
-        "message": "Success",
-        "results": {
-            "_id": 123456789,
-            "position": 1
+    "MachineCoinVote": {
+      "events": [
+        {
+          "type": "coinPulse",
+          "timestamp": 1653457092123,
+          "source": {
+            "vendorHwid ": "dj12300105",
+            "count": 11364,
+            "inputPortId": 1,
+            "offline": false
+          }
+        }
+      ]
+    },
+    "webhook": {
+      "events": [{
+      "type":"coinPulse",
+      "timestamp": 1653457092123,
+      "source": {
+        "vendorHwid ": "dj12300105",
+        "count": 1,
+        "inputPortId":1,
+          "offline":false
         } 
+      }]
     }
-}
-   
+  }
