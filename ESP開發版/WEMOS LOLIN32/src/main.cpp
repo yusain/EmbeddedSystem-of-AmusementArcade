@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <ArduinoJson.h> //忽略vscode錯誤
+#include <ArduinoJson.h>
 #include <WiFiMulti.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -462,7 +462,7 @@ void realCoinAndTicketing( void * parameter ){
     vTaskDelay(5 / portTICK_RATE_MS );
   }
 }
-/*
+
 //[執行緒] 測試
 void testThread( void * parameter ){
   while(true) {
@@ -475,7 +475,7 @@ void testThread( void * parameter ){
     vTaskDelay( 2000 / portTICK_RATE_MS ); 
   }
 }
-*/
+
 void setup() {
   //初始化
   Serial.begin(9600); //設定uart胞率
@@ -506,7 +506,7 @@ void setup() {
   pinMode(testInput2, INPUT_PULLUP);  //測試開關2
 
   //開啟「狀態燈」執行續在核心0
-  //xTaskCreate( statusLED, "statusLED", 1024, NULL, 2, &taskStatusLED);
+  xTaskCreate( statusLED, "statusLED", 1024, NULL, 2, &taskStatusLED);
   //xTaskCreatePinnedToCore( statusLED, "statusLED", 1024, NULL, 0, &taskStatusLED, 0);
   
   //呼叫連線
@@ -523,7 +523,7 @@ void setup() {
   xTaskCreate( realCoinAndTicketing, "realCoinAndTicketing", 8192, NULL, 0, &taskRealCoinAndTicketing);
   //xTaskCreatePinnedToCore( realCoinAndTicketing, "realCoinAndTicketing", 8192, NULL, 2, &taskRealCoin, 1);
 
-  //開啟「realCoin」執行續在核心1
+  //開啟「test」執行續在核心1
   //xTaskCreate( testThread, "testThread", 8192, NULL, 0, &taskTestThread);
   //xTaskCreatePinnedToCore( realCoinAndTicketing, "realCoinAndTicketing", 8192, NULL, 2, &taskRealCoin, 1);
 
@@ -531,11 +531,10 @@ void setup() {
 }
 
 void loop() {
-  /*
   if(digitalRead(testInput1) == false){
     simulationCoinPulse(5);
   }
   if(digitalRead(testInput2) == false){
     simulationTicketPulse(5);
-  }*/
+  }
 }
