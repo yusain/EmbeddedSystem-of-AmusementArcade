@@ -29,12 +29,12 @@
 //╔═════════════════╗
 // 網 路 相 關 參 數
 //╚═════════════════╝
-const char globleWiFiSSID[] = "e521"; //威秀wifi
-const char globleWiFiPassword[] = "e521E521e521"; //12346789
+const char globleWiFiSSID[] = "190-B"; //威秀wifi
+const char globleWiFiPassword[] = "0927127373"; //12346789
 String globleServerPath = "https://2d89-118-160-65-214.ngrok.io"; //偉中後端伺服器URL
 float globleTemperature = 0;
 float globleHumidity = 0;              
-int globleMHSsensor = 0;              
+int globleMHsensor = 0;              
 int globleLDR = 0;              
 //╔═══════════╗
 // 腳 位 宣 告
@@ -146,11 +146,11 @@ int webhook(){
     //建構post內容
     httpRequestData = "{\n\"Temperature\" :";
     httpRequestData += String(globleTemperature);
-    httpRequestData += "\n,\"Humidity\" :";
+    httpRequestData += ",\n\"Humidity\" :";
     httpRequestData += String(globleHumidity);
-    httpRequestData += "\n,\"dust\" :";
-    httpRequestData += String(globleMHSsensor);
-    httpRequestData += "\n,\"LDR\" :";
+    httpRequestData += ",\n\"Dust\" :";
+    httpRequestData += String(globleMHsensor);
+    httpRequestData += ",\n\"LDR\" :";
     httpRequestData += String(globleLDR);
     httpRequestData += "\n}";
     Serial.println("[webhook] working...\n");
@@ -241,15 +241,14 @@ void loop() {
     Serial.print(event.relative_humidity);
     Serial.println(F("%"));
   }
-
-  Serial.println(F("-------------------------\n"));
-  // MHSsensor
-  globleMHSsensor = analogRead(sensorPin);
-  Serial.printf("現在檢測土壤溼度為: %d\n",globleMHSsensor);
   Serial.println(F("-------------------------\n"));
 
+  // MHsensor
+  globleMHsensor = analogRead(sensorPin);
+  Serial.printf("現在檢測土壤溼度為: %d\n",globleMHsensor);
+  Serial.println(F("-------------------------\n"));
   // 乾燥程度大於 800 時，亮燈
-  if (globleMHSsensor > 800) {
+  if (globleMHsensor > 800) {
        digitalWrite(LEDRed, HIGH); }
   else {
       digitalWrite(LEDRed, LOW);  }
