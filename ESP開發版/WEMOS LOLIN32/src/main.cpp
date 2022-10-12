@@ -19,8 +19,7 @@
 
 // Uncomment the type of sensor in use:
 #define DHTTYPE    DHT11     // DHT 11
-//#define DHTTYPE    DHT22     // DHT 22 (AM2302)
-//#define DHTTYPE    DHT21     // DHT 21 (AM2301)
+
 
 // See guide for details on sensor wiring and usage:
 //   https://learn.adafruit.com/dht/overview
@@ -33,9 +32,10 @@
 const char globleWiFiSSID[] = "e521"; //威秀wifi
 const char globleWiFiPassword[] = "e521E521e521"; //12346789
 String globleServerPath = "https://2d89-118-160-65-214.ngrok.io"; //偉中後端伺服器URL
-float globletemp = 0;              
-int globlewater = 0;              
-int globledust = 0;              
+float globleTemperature = 0;
+float globleHumidity = 0;              
+int globleMHSsensor = 0;              
+int globleLDR = 0;              
 //╔═══════════╗
 // 腳 位 宣 告
 //╚═══════════╝
@@ -144,12 +144,14 @@ int webhook(){
     HTTPClient http;
 
     //建構post內容
-    httpRequestData = "{\n\"temp\" :";
-    httpRequestData += String(globletemp);
-    httpRequestData += "\n,\"water\" :";
-    httpRequestData += String(globlewater);
+    httpRequestData = "{\n\"Temperature\" :";
+    httpRequestData += String(globleTemperature);
+    httpRequestData += "\n,\"Humidity\" :";
+    httpRequestData += String(globleHumidity);
     httpRequestData += "\n,\"dust\" :";
-    httpRequestData += String(globledust);
+    httpRequestData += String(globleMHSsensor);
+    httpRequestData += "\n,\"LDR\" :";
+    httpRequestData += String(globleLDR);
     httpRequestData += "\n}";
     Serial.println("[webhook] working...\n");
     Serial.println(httpRequestData);
@@ -218,9 +220,11 @@ void loop() {
   dht.temperature().getEvent(&event);
   Serial.println(F("-------------------------"));
   if (isnan(event.temperature)) {
+    globleTemperature = 0;
     Serial.println(F("Error reading temperature!"));
   }
   else {
+    globleTemperature = event.temperature;
     Serial.print(F("Temperature: "));
     Serial.print(event.temperature);
     Serial.println(F("°C"));
@@ -228,9 +232,11 @@ void loop() {
   // Get humidity event and print its value.
   dht.humidity().getEvent(&event);
   if (isnan(event.relative_humidity)) {
+    globleHumidity = 0;
     Serial.println(F("Error reading humidity!"));
   }
   else {
+    globleHumidity = event.relative_humidity;
     Serial.print(F("Humidity: "));
     Serial.print(event.relative_humidity);
     Serial.println(F("%"));
@@ -238,21 +244,21 @@ void loop() {
 
   Serial.println(F("-------------------------\n"));
   // MHSsensor
-  int moist;
-  moist = analogRead(sensorPin);
-  Serial.printf("現在檢測土壤溼度為: %d\n",moist);
-  Serial.println(F("-------------------------\n"));
-  // light
-  int lightvalue;
-  lightvalue = analogRead(lightPin);
-  Serial.printf("現在檢測光線強度為: %d\n",lightvalue);
+  globleMHSsensor = analogRead(sensorPin);
+  Serial.printf("現在檢測土壤溼度為: %d\n",globleMHSsensor);
   Serial.println(F("-------------------------\n"));
 
   // 乾燥程度大於 800 時，亮燈
-  if (moist > 800) {
+  if (globleMHSsensor > 800) {
        digitalWrite(LEDRed, HIGH); }
   else {
       digitalWrite(LEDRed, LOW);  }
 
+  // LDR (light-dependent resistor)
+  globleLDR = analogRead(lightPin);
+  Serial.printf("現在檢測光線強度為: %d\n",globleLDR);
+  Serial.println(F("-------------------------\n"));
+
+  // Webhook 
   webhook();
 }
