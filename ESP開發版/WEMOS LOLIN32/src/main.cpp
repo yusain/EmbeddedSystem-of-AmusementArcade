@@ -31,7 +31,7 @@
 //╚═════════════════╝
 const char globleWiFiSSID[] = "190-B"; //威秀wifi
 const char globleWiFiPassword[] = "0927127373"; //12346789
-String globleServerPath = "https://2d89-118-160-65-214.ngrok.io"; //偉中後端伺服器URL
+String globleServerPath = "https://c1fd1658-3781-45a0-a2fd-a9cfa582b21c.mock.pstmn.io/"; //偉中後端伺服器URL
 float globleTemperature = 0;
 float globleHumidity = 0;              
 int globleMHsensor = 0;              
@@ -100,12 +100,12 @@ int64_t getTimestamp() {
 
 //[函  式] 負責連上網路
 void wifiConnect( void ){
-  WiFiMulti wifiMulti;
-  WiFi.mode(WIFI_STA);
+  //WiFi.mode(WIFI_STA);
   Serial.print("[wifiConnect] 嘗試連線 SSID:");
   Serial.print(globleWiFiSSID);
   Serial.print(" Password:");
   Serial.println(globleWiFiPassword);
+  //WiFiMulti wifiMulti;
   //wifiMulti.h方法
   //wifiMulti.addAP("威秀wifi", "12346789");
   //wifiMulti.addAP("zhenyu的iphone", "12346789"); 
@@ -156,18 +156,21 @@ int webhook(){
     Serial.println("[webhook] working...\n");
     Serial.println(httpRequestData);
 
-    http.begin(client, globleServerPath);
-    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    http.begin(globleServerPath);
+    http.addHeader("Content-Type", "application/json");
     int httpResponseCode = http.POST(httpRequestData);
-    String response = http.getString();
-    Serial.println(response);
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    String payload = http.getString();
+    Serial.println(payload);
+    //http.end();
     return 0;
   }
   return 1;
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(LEDRed, OUTPUT);    
   pinMode(sensorPin,INPUT);
   pinMode(lightPin,INPUT);
