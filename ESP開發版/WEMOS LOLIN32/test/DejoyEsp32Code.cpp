@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
+#include <ArduinoJson.h> //忽略vscode錯誤
 #include <WiFiMulti.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -9,8 +9,8 @@
 //╔═════════════════╗
 // 網 路 相 關 參 數
 //╚═════════════════╝
-const char globleWiFiSSID[] = "e521"; //威秀wifi
-const char globleWiFiPassword[] = "e521E521e521"; //12346789
+const char globleWiFiSSID[] = "DJ-Guest"; //威秀wifi
+const char globleWiFiPassword[] = "0227731355"; //12346789
 String globleServerPath = "http://163.13.133.185:3001"; //中間伺服器URL
 String globleCompanyAbbreviation = "dj"; //公司簡寫
 int globleId = 113001;              //本裝置編號
@@ -51,9 +51,6 @@ enum statusFlag { //狀態燈
 enum busyFlag { //
       rushHour = 1800, unRushHour = 5000
 }busyFlag;
-enum oledFlag {
-        wifi, dth11, hwSoil, waterpump, sunlightR
-}oledFlag;
 
 //╔═════════════════╗
 // 工 作 列 隊 宣 告
@@ -526,8 +523,8 @@ void setup() {
   xTaskCreate( realCoinAndTicketing, "realCoinAndTicketing", 8192, NULL, 0, &taskRealCoinAndTicketing);
   //xTaskCreatePinnedToCore( realCoinAndTicketing, "realCoinAndTicketing", 8192, NULL, 2, &taskRealCoin, 1);
 
-  //開啟「test」執行續在核心1
-  //xTaskCreate( testThread, "testThread", 8192, NULL, 0, &taskTestThread);
+  //開啟「realCoin」執行續在核心1
+  xTaskCreate( testThread, "testThread", 8192, NULL, 0, &taskTestThread);
   //xTaskCreatePinnedToCore( realCoinAndTicketing, "realCoinAndTicketing", 8192, NULL, 2, &taskRealCoin, 1);
 
   //webhook("coinPulse" ,10);
@@ -540,317 +537,4 @@ void loop() {
   if(digitalRead(testInput2) == false){
     simulationTicketPulse(5);
   }
-}
-#include <Arduino.h>
-#include <string.h>
-#include <U8g2lib.h>
-
-#ifdef U8X8_HAVE_HW_SPI
-#include <SPI.h>
-#endif
-#ifdef U8X8_HAVE_HW_I2C
-#include <Wire.h>
-#endif
-
-
-/*
-  U8g2lib Example Overview:
-    Frame Buffer Examples: clearBuffer/sendBuffer. Fast, but may not work with all Arduino boards because of RAM consumption
-    Page Buffer Examples: firstPage/nextPage. Less RAM usage, should work with all Arduino boards.
-    U8x8 Text Only Example: No RAM usage, direct communication with display controller. No graphics, 8x8 Text only.
-    
-*/
-
-// Please UNCOMMENT one of the contructor lines below
-// U8g2 Contructor List (Frame Buffer)
-// The complete list is available here: https://github.com/olikraus/u8g2/wiki/u8g2setupcpp
-// Please update the pin numbers according to your setup. Use U8X8_PIN_NONE if the reset pin is not connected
-U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ 4, /* data=*/ 5, /* reset=*/ U8X8_PIN_NONE);   // All Boards without Reset of the Display
-
-// End of constructor list
-
-
-void u8g2_prepare(void) {
-  u8g2.setFont(u8g2_font_6x10_tf);
-  u8g2.setFontRefHeightExtendedText();
-  u8g2.setDrawColor(1);
-  u8g2.setFontPosTop();
-  u8g2.setFontDirection(0);
-}
-
-void u8g2_box_frame(uint8_t a) {
-  u8g2.setFont(u8g2_font_helvR08_tr);
-  char s[] = "Cage";
-  int w = u8g2.getStrWidth(s);      // returns w = 24
-  int h = u8g2.getAscent(s)- u8g2.GetDescent(s);
-  int x = 5;
-  int y = 11;
-  u8g2.setFontPosBaseline();
-  u8g2.firstPage();
-  do
-  {
-    u8g2.drawStr(x, y, s);
-    u8g2.drawFrame(x-1,y-u8g2.getAscent()-1, w+2, h+2);
-  } while( u8g2.nextPage() );
-}
-
-void u8g2_disc_circle(uint8_t a) {
-  u8g2.drawStr( 0, 0, "drawDisc");
-  u8g2.drawDisc(10,18,9);
-  u8g2.drawDisc(24+a,16,7);
-  u8g2.drawStr( 0, 30, "drawCircle");
-  u8g2.drawCircle(10,18+30,9);
-  u8g2.drawCircle(24+a,16+30,7);
-}
-
-void u8g2_r_frame(uint8_t a) {
-  u8g2.drawStr( 0, 0, "drawRFrame/Box");
-  u8g2.drawRFrame(5, 10,40,30, a+1);
-  u8g2.drawRBox(50, 10,25,40, a+1);
-}
-
-void u8g2_line(uint8_t a) {
-  u8g2.drawStr( 0, 0, "drawLine");
-  u8g2.drawLine(7+a, 10, 40, 55);
-  u8g2.drawLine(7+a*2, 10, 60, 55);
-  u8g2.drawLine(7+a*3, 10, 80, 55);
-  u8g2.drawLine(7+a*4, 10, 100, 55);
-}
-
-void u8g2_triangle(uint8_t a) {
-  uint16_t offset = a;
-  u8g2.drawStr( 0, 0, "drawTriangle");
-  u8g2.drawTriangle(14,7, 45,30, 10,40);
-  u8g2.drawTriangle(14+offset,7-offset, 45+offset,30-offset, 57+offset,10-offset);
-  u8g2.drawTriangle(57+offset*2,10, 45+offset*2,30, 86+offset*2,53);
-  u8g2.drawTriangle(10+offset,40+offset, 45+offset,30+offset, 86+offset,53+offset);
-}
-char wifi[] = "(wifi)";
-void u8g2_extra_page(uint8_t a)
-{
-  u8g2.setFont(u8g2_font_open_iconic_all_1x_t);
-  u8g2.setFontPosTop();
-  u8g2.drawGlyph(0, 0, 0xf8);
-  u8g2.setFont(u8g2_font_6x13_tr);
-  u8g2.drawStr(5, u8g2.getDisplayWidth(), wifi);
-}
-
-uint8_t draw_state = 0;
-
-void draw(void) {
-  u8g2_prepare();
-  u8g2_extra_page(draw_state&5);
-  /*
-  switch(draw_state) {
-    case 0: u8g2_box_frame(draw_state&5); break;
-    case 1: u8g2_disc_circle(draw_state&5); break;
-    case 2: u8g2_r_frame(draw_state&5); break;
-    case 3: u8g2_line(draw_state&5); break;
-    case 4: u8g2_triangle(draw_state&5); break;
-    case 5: u8g2_extra_page(draw_state&5); break;
-  }*/
-}
-
-
-void setup(void) {
-  u8g2.begin();
-}
-
-void loop(void) {
-  // picture loop  
-  u8g2.clearBuffer();
-  draw();
-  u8g2.sendBuffer();
-  Serial.println(draw_state);
-  // increase the state
-  draw_state++;
-  if ( draw_state >= 6 )
-    draw_state = 0;
-
-  // deley between each page
-  delay(100);
-
-}
-
-void setup(void) {
-  
-  // DOGS102 Shield (http://shieldlist.org/controlconnection/dogs102)
-  u8g2.begin(/* menu_select_pin= */ 5, /* menu_next_pin= */ 4, /* menu_prev_pin= */ 2, /* menu_home_pin= */ 3);
-  
-  // DOGM128 Shield (http://shieldlist.org/schmelle2/dogm128) + DOGXL160 Shield
-  // u8g2.begin(/* menu_select_pin= */ 2, /* menu_next_pin= */ 3, /* menu_prev_pin= */ 7, /* menu_home_pin= */ 8);
-
-  // MKR Zero Test Board
-  // u8g2.begin(/*Select=*/ 0, /*Right/Next=*/ 1, /*Left/Prev=*/ 2, /*Up=*/ 4, /*Down=*/ 3, /*Home/Cancel=*/ A6); 
-
-  // Arduboy
-  //u8g2.begin(/*Select=*/ A0, /*Right/Next=*/ 5, /*Left/Prev=*/ 9, /*Up=*/ 8, /*Down=*/ 10, /*Home/Cancel=*/ A1); // Arduboy DevKit
-  //u8g2.begin(/*Select=*/ 7, /*Right/Next=*/ A1, /*Left/Prev=*/ A2, /*Up=*/ A0, /*Down=*/ A3, /*Home/Cancel=*/ 8); // Arduboy 10 (Production)
-
-  u8g2.setFont(u8g2_font_6x12_tr);
-}
-
-struct menu_entry_type
-{
-  const uint8_t *font;
-  uint16_t icon;
-  const char *name;
-};
-
-struct menu_state
-{
-  int16_t menu_start;		/* in pixel */
-  int16_t frame_position;		/* in pixel */
-  uint8_t position;			/* position, array index */
-};
-
-/*
-  Icon configuration
-  Width and height must match the icon font size
-  GAP: Space between the icons
-  BGAP: Gap between the display border and the cursor.
-*/
-#define ICON_WIDTH 32
-#define ICON_HEIGHT 32
-#define ICON_GAP 4
-#define ICON_BGAP 16
-#define ICON_Y 32+ ICON_GAP
-
-struct menu_entry_type menu_entry_list[] =
-{
-  { u8g2_font_open_iconic_embedded_4x_t, 65, "Clock Setup"},
-  { u8g2_font_open_iconic_embedded_4x_t, 66, "Gear Game"},
-  { u8g2_font_open_iconic_embedded_4x_t, 67, "Flash Light"},
-  { u8g2_font_open_iconic_embedded_4x_t, 68, "Home"},
-  { u8g2_font_open_iconic_embedded_4x_t, 72, "Configuration"},
-  { NULL, 0, NULL } 
-};
-
-int8_t button_event = 0;		// set this to 0, once the event has been processed
-
-void check_button_event(void)
-{
-  if ( button_event == 0 )
-    button_event = u8g2.getMenuEvent();
-}
-
-
-void draw(struct menu_state *state)
-{
-  int16_t x;
-  uint8_t i;
-  x = state->menu_start;
-  i = 0;
-  while( menu_entry_list[i].icon > 0 )  
-  {
-    if ( x >= -ICON_WIDTH && x < u8g2.getDisplayWidth() )
-    {
-      u8g2.setFont(menu_entry_list[i].font);
-      u8g2.drawGlyph(x, ICON_Y, menu_entry_list[i].icon );
-    }
-    i++;
-    x += ICON_WIDTH + ICON_GAP;
-    check_button_event();
-  }
-  u8g2.drawFrame(state->frame_position-1, ICON_Y-ICON_HEIGHT-1, ICON_WIDTH+2, ICON_WIDTH+2);
-  u8g2.drawFrame(state->frame_position-2, ICON_Y-ICON_HEIGHT-2, ICON_WIDTH+4, ICON_WIDTH+4);
-  u8g2.drawFrame(state->frame_position-3, ICON_Y-ICON_HEIGHT-3, ICON_WIDTH+6, ICON_WIDTH+6);
-  check_button_event();
-}
-
-
-void to_right(struct menu_state *state)
-{
-  if ( menu_entry_list[state->position+1].font != NULL )
-  {
-    if ( (int16_t)state->frame_position+ 2*(int16_t)ICON_WIDTH + (int16_t)ICON_BGAP < (int16_t)u8g2.getDisplayWidth() )
-    {
-      state->position++;
-      state->frame_position += ICON_WIDTH + (int16_t)ICON_GAP;
-    }
-    else
-    {
-      state->position++;      
-      state->frame_position = (int16_t)u8g2.getDisplayWidth() - (int16_t)ICON_WIDTH - (int16_t)ICON_BGAP;
-      state->menu_start = state->frame_position - state->position*((int16_t)ICON_WIDTH + (int16_t)ICON_GAP);
-    }
-  }
-}
-
-void to_left(struct menu_state *state)
-{
-  if ( state->position > 0 )
-  {
-    if ( (int16_t)state->frame_position >= (int16_t)ICON_BGAP+(int16_t)ICON_WIDTH+ (int16_t)ICON_GAP )
-    {
-      state->position--;
-      state->frame_position -= ICON_WIDTH + (int16_t)ICON_GAP;
-    }    
-    else
-    {
-      state->position--; 
-      state->frame_position = ICON_BGAP;
-      state->menu_start = state->frame_position - state->position*((int16_t)ICON_WIDTH + (int16_t)ICON_GAP);      
-    }
-  }
-}
-
-
-uint8_t towards_int16(int16_t *current, int16_t dest)
-{
-  if ( *current < dest )
-  {
-    (*current)++;
-    return 1;
-  }
-  else if ( *current > dest )
-  {
-    (*current)--;
-    return 1;
-  }
-  return 0;
-}
-
-uint8_t towards(struct menu_state *current, struct menu_state *destination)
-{
-  uint8_t r = 0;
-  uint8_t i;
-  for( i = 0; i < 6; i++ )
-  {
-    r |= towards_int16( &(current->frame_position), destination->frame_position);
-    r |= towards_int16( &(current->menu_start), destination->menu_start);
-  }
-  return r;
-}
-
-
-
-struct menu_state current_state = { ICON_BGAP, ICON_BGAP, 0 };
-struct menu_state destination_state = { ICON_BGAP, ICON_BGAP, 0 };
-
-void loop(void) {
-  do
-  {
-    u8g2.firstPage();
-    do
-    {
-      draw(&current_state);  
-      u8g2.setFont(u8g2_font_helvB10_tr);  
-      u8g2.setCursor((u8g2.getDisplayWidth()-u8g2.getStrWidth(menu_entry_list[destination_state.position].name))/2,u8g2.getDisplayHeight()-5);
-      u8g2.print(menu_entry_list[destination_state.position].name);
-      check_button_event();
-      delay(10);
-    } while( u8g2.nextPage() );
-    if ( button_event == U8X8_MSG_GPIO_MENU_NEXT )
-      to_right(&destination_state);
-    if ( button_event == U8X8_MSG_GPIO_MENU_PREV )
-      to_left(&destination_state);
-    if ( button_event == U8X8_MSG_GPIO_MENU_SELECT )
-    {
-      u8g2.setFont(u8g2_font_helvB10_tr);  
-      u8g2.userInterfaceMessage("Selection:", menu_entry_list[destination_state.position].name, "", " Ok ");
-    }
-    if ( button_event > 0 )	// all known events are processed, clear event
-      button_event = 0;
-  } while ( towards(&current_state, &destination_state) );
 }

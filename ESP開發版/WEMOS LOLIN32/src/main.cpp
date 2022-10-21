@@ -31,7 +31,7 @@
 //╚═════════════════╝
 const char globleWiFiSSID[] = "190-B"; //威秀wifi
 const char globleWiFiPassword[] = "0927127373"; //12346789
-String globleServerPath = "https://c1fd1658-3781-45a0-a2fd-a9cfa582b21c.mock.pstmn.io/"; //偉中後端伺服器URL
+String globleServerPath = "http://e3b1-163-13-133-72.ngrok.io/"; //偉中後端伺服器URL
 float globleTemperature = 0;
 float globleHumidity = 0;              
 int globleMHsensor = 0;              
@@ -140,30 +140,35 @@ int webhook(){
   String httpRequestData;
 
   if( WiFi.status() == WL_CONNECTED ){
-    WiFiClient client;
+    //WiFiClientSecure client;
     HTTPClient http;
-
     //建構post內容
-    httpRequestData = "{\n\"Temperature\" :";
+    httpRequestData = "{\n  \"Temperature\": ";
     httpRequestData += String(globleTemperature);
-    httpRequestData += ",\n\"Humidity\" :";
+    httpRequestData += ",\n  \"Humidity\": ";
     httpRequestData += String(globleHumidity);
-    httpRequestData += ",\n\"Dust\" :";
+    httpRequestData += ",\n  \"Dust\": ";
     httpRequestData += String(globleMHsensor);
-    httpRequestData += ",\n\"LDR\" :";
+    httpRequestData += ",\n  \"LightDR\": ";
     httpRequestData += String(globleLDR);
+    httpRequestData += ",\n  \"WaterMotor\": ";
+    httpRequestData += "\"flase\"";
+    httpRequestData += ",\n  \"timestamp\": ";
+    httpRequestData += String(getTimestamp());
     httpRequestData += "\n}";
     Serial.println("[webhook] working...\n");
     Serial.println(httpRequestData);
 
-    http.begin(globleServerPath);
+    http.begin(globleServerPath.c_str());
+    Serial.print("url: ");
+    Serial.println(globleServerPath.c_str());
     http.addHeader("Content-Type", "application/json");
     int httpResponseCode = http.POST(httpRequestData);
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
     String payload = http.getString();
     Serial.println(payload);
-    //http.end();
+    http.end();
     return 0;
   }
   return 1;
@@ -200,7 +205,7 @@ void setup() {
   Serial.print  (F("Resolution:  ")); Serial.print(sensor.resolution); Serial.println(F("%"));
   Serial.println(F("------------------------------------"));
   // Set delay between sensor readings based on sensor details.
-  delayMS = sensor.min_delay / 1000 * 5;
+  delayMS = sensor.min_delay / 1000 * 60 * 1;
  
   //呼叫連線
   wifiConnect( );
