@@ -29,18 +29,20 @@
 //╔═════════════════╗
 // 網 路 相 關 參 數
 //╚═════════════════╝
-const char globleWiFiSSID[] = "190-B"; //威秀wifi
-const char globleWiFiPassword[] = "0927127373"; //12346789
+const char globleWiFiSSID[] = "e521"; //威秀wifi
+const char globleWiFiPassword[] = "e521E521e521"; //12346789
 String globleServerPath = "http://e3b1-163-13-133-72.ngrok.io/"; //偉中後端伺服器URL
 float globleTemperature = 0;
 float globleHumidity = 0;              
 int globleMHsensor = 0;              
-int globleLDR = 0;              
+int globleLDR = 0; 
+bool globleWaterMotor = false;
+long long lastWaterMotortime = 0;       
 //╔═══════════╗
 // 腳 位 宣 告
 //╚═══════════╝
 
-const int8_t  LEDRed = 2;          
+const int8_t  Waterpin = 26;          
 const int8_t  sensorPin = 34;  
 const int8_t  DHTPIN = 14;        
 const int8_t  lightPin = 35;    
@@ -100,6 +102,7 @@ int64_t getTimestamp() {
 
 //[函  式] 負責連上網路
 void wifiConnect( void ){
+
   //WiFi.mode(WIFI_STA);
   Serial.print("[wifiConnect] 嘗試連線 SSID:");
   Serial.print(globleWiFiSSID);
@@ -116,7 +119,6 @@ void wifiConnect( void ){
   //WiFi.h方法
   WiFi.begin(globleWiFiSSID, globleWiFiPassword);
   
-  //WiFi.begin("zhenyu的iphone", "12346789");
   Serial.print("[wifiConnect] 等待");
   while (WiFi.status() != WL_CONNECTED) {
     statusFlag = execution;
@@ -124,7 +126,7 @@ void wifiConnect( void ){
     vTaskDelay(500 / portTICK_RATE_MS );
   }
   
-  //WiFi.h方法
+  // WiFi.h方法
   statusFlag = connectedInternet;
   Serial.println("\n[wifiConnect] Wi-Fi連線成功");
   Serial.print("[wifiConnect] SSID：");
@@ -140,9 +142,11 @@ int webhook(){
   String httpRequestData;
 
   if( WiFi.status() == WL_CONNECTED ){
-    //WiFiClientSecure client;
+    
+    // WiFiClientSecure client;
     HTTPClient http;
-    //建構post內容
+
+    // 建構post內容
     httpRequestData = "{\n  \"Temperature\": ";
     httpRequestData += String(globleTemperature);
     httpRequestData += ",\n  \"Humidity\": ";
@@ -150,18 +154,17 @@ int webhook(){
     httpRequestData += ",\n  \"Dust\": ";
     httpRequestData += String(globleMHsensor);
     httpRequestData += ",\n  \"LightDR\": ";
-    httpRequestData += String(globleLDR);
+    httpRequestData += bool(globleLDR);
     httpRequestData += ",\n  \"WaterMotor\": ";
-    httpRequestData += "\"flase\"";
+    httpRequestData += String(globleWaterMotor);
     httpRequestData += ",\n  \"timestamp\": ";
     httpRequestData += String(getTimestamp());
     httpRequestData += "\n}";
     Serial.println("[webhook] working...\n");
     Serial.println(httpRequestData);
 
-    http.begin(globleServerPath.c_str());
-    Serial.print("url: ");
-    Serial.println(globleServerPath.c_str());
+    Serial.print("url: ");Serial.println(globleServerPath.c_str());
+    http.begin(globleServerPath.c_str());   
     http.addHeader("Content-Type", "application/json");
     int httpResponseCode = http.POST(httpRequestData);
     Serial.print("HTTP Response code: ");
@@ -169,16 +172,20 @@ int webhook(){
     String payload = http.getString();
     Serial.println(payload);
     http.end();
+
     return 0;
   }
   return 1;
 }
 
 void setup() {
-  Serial.begin(115200);
-  pinMode(LEDRed, OUTPUT);    
+
+  Serial.begin(115200);          
+  pinMode(Waterpin, OUTPUT);    
   pinMode(sensorPin,INPUT);
   pinMode(lightPin,INPUT);
+  //水馬達初始化
+  digitalWrite(Waterpin, HIGH); 
   // Initialize device.
   dht.begin();
   Serial.println(F("DHTxx Unified Sensor Example"));
@@ -194,6 +201,7 @@ void setup() {
   Serial.print  (F("Min Value:   ")); Serial.print(sensor.min_value); Serial.println(F("°C"));
   Serial.print  (F("Resolution:  ")); Serial.print(sensor.resolution); Serial.println(F("°C"));
   Serial.println(F("------------------------------------"));
+  
   // Print humidity sensor details.
   dht.humidity().getSensor(&sensor);
   Serial.println(F("Humidity Sensor"));
@@ -204,6 +212,7 @@ void setup() {
   Serial.print  (F("Min Value:   ")); Serial.print(sensor.min_value); Serial.println(F("%"));
   Serial.print  (F("Resolution:  ")); Serial.print(sensor.resolution); Serial.println(F("%"));
   Serial.println(F("------------------------------------"));
+
   // Set delay between sensor readings based on sensor details.
   delayMS = sensor.min_delay / 1000 * 60 * 1;
  
@@ -220,9 +229,7 @@ void setup() {
   //webhook("coinPulse" ,10);
 }
 
-void loop() {
-   // Delay between measurements.
-  delay(delayMS);
+void loop() { 
   // Get temperature event and print its value.
   sensors_event_t event;
   dht.temperature().getEvent(&event);
@@ -237,6 +244,7 @@ void loop() {
     Serial.print(event.temperature);
     Serial.println(F("°C"));
   }
+
   // Get humidity event and print its value.
   dht.humidity().getEvent(&event);
   if (isnan(event.relative_humidity)) {
@@ -255,17 +263,32 @@ void loop() {
   globleMHsensor = analogRead(sensorPin);
   Serial.printf("現在檢測土壤溼度為: %d\n",globleMHsensor);
   Serial.println(F("-------------------------\n"));
-  // 乾燥程度大於 800 時，亮燈
-  if (globleMHsensor > 800) {
-       digitalWrite(LEDRed, HIGH); }
-  else {
-      digitalWrite(LEDRed, LOW);  }
 
   // LDR (light-dependent resistor)
   globleLDR = analogRead(lightPin);
   Serial.printf("現在檢測光線強度為: %d\n",globleLDR);
   Serial.println(F("-------------------------\n"));
-
+  digitalWrite(Waterpin, HIGH); 
+ 
+  //WaterMotor(12hours open 5 seconds)
+  globleWaterMotor = false; 
+  long long Nowtime =  getTimestamp();
+ 
+  if(Nowtime - lastWaterMotortime > 45000000){
+      digitalWrite(Waterpin, LOW); 
+      delay(5000);
+      digitalWrite(Waterpin, HIGH);
+      globleWaterMotor = true;  
+      Serial.printf("現在檢測水馬達啟動: %d\n",globleWaterMotor);
+      Serial.println(F("-------------------------\n"));
+      lastWaterMotortime = Nowtime;   }
+  else {
+      //Serial.printf("距離上次水馬達啟動: %d\n",(Nowtime - lastWaterMotortime));
+      digitalWrite(Waterpin, HIGH);  }
+ 
   // Webhook 
   webhook();
+
+  // Delay between measurements.
+  delay(delayMS);
 }
