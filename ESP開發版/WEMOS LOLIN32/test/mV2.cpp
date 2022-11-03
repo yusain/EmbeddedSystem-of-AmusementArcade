@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-//#include <esp_task_wdt.h>
-
 #include <WiFiMulti.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -82,7 +80,7 @@ int loopdelay = 1 * 60 * 1000;
 // ╔════════════════════╗
 //  工 作 執 行 緒 宣 告
 // ╚════════════════════╝
-TaskHandle_t tasku8g2_Dispaly, taskuGPIOSensor, taskWatchDog;
+TaskHandle_t tasku8g2_Dispaly, taskuGPIOSensor;
 
 // ╔════════════════════╗
 //  旗 標 與 結 構 宣 告 
@@ -90,7 +88,7 @@ TaskHandle_t tasku8g2_Dispaly, taskuGPIOSensor, taskWatchDog;
 enum statusFlag { //系統狀態旗標
       execution = 1, connectedInternet, TimeCalibration, 
       Webhook , Webhookfalse, WebhookSuccess,
-      ReTry
+      restart
 }statusFlag;
 
 struct IconStatus { //Icon狀態存取
@@ -103,13 +101,6 @@ struct IconStatus { //Icon狀態存取
 // ╚═════════════════╝
 DHT_Unified dht(DHTPIN, DHTTYPE);
 uint32_t delaySensorMS;
-
-// [函  式] 取得現在時間
-int64_t getTimestamp() {
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
-}
 
 // [函  式] 負責校準時間
 unsigned long long timeCalibration( void ){
@@ -126,13 +117,19 @@ unsigned long long timeCalibration( void ){
       Serial.println("[timeCalibration] 校準失敗3秒後重新開始");
       delay(3000);
     }else{
-      lastWaterMotortime = getTimestamp();
       Serial.println("[timeCalibration] 校準成功");
       return 0;
     }
   }
   Serial.println("[timeCalibration] 無網路無法校準");
   return 0;
+}
+
+// [函  式] 取得現在時間
+int64_t getTimestamp() {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1000LL + (tv.tv_usec / 1000LL));
 }
 
 // [函  式] 負責連上網路
@@ -161,6 +158,7 @@ void wifiConnect( void ){
   }
   
   // WiFi.h方法
+  statusFlag = execution;
   Serial.println("\n[wifiConnect] Wi-Fi連線成功");
   Serial.print("[wifiConnect] SSID：");
   Serial.println(WiFi.SSID());
@@ -311,12 +309,12 @@ void u8g2_StatusFlag(void){
   String SystemStatus = "";
   switch (statusFlag)
   { case execution:         SystemStatus = "SystemWorking"; break;
-    case connectedInternet: SystemStatus = "WiFi: " + String(globleWiFiSSID); break;
+    case connectedInternet: SystemStatus = "WiFiConnect:" + String(globleWiFiSSID); break;
     case TimeCalibration:   SystemStatus = "TimeCalibration"; break;
     case Webhook:           SystemStatus = "Webhook..."; break;
     case WebhookSuccess:    SystemStatus = "Webhook Success"; break;
     case Webhookfalse:      SystemStatus = "Webhook false"; break;
-    case ReTry:           SystemStatus = "ReTry"; break;
+    case restart:           SystemStatus = "ReStart..."; break;
     default:                SystemStatus = ""; break; }
 
   u8g2.setFont(u8g2_font_6x10_tf);
@@ -433,13 +431,16 @@ void GPIOSensor(void * parameter){
     WaterMotor();
 
     //delay between measurements
-    delay(delaySensorMS);
+    delay(delaySensorMS / portTICK_RATE_MS);
 
   } 
 }
 
+// [任 務/ 執 行 續] GPIOSensor偵測各個感測器
+//voide WatchDog(){  ESP.restart();}
+
 // [函  式] webhook回報後台
-int webhook(){
+void webhook(){
 
   String httpRequestData;
   
@@ -479,24 +480,11 @@ int webhook(){
 
     httpResponseCode  == 200 ? statusFlag = WebhookSuccess : statusFlag = Webhookfalse; 
     delay(500 / portTICK_RATE_MS);
-    statusFlag == WebhookSuccess ? statusFlag =  execution : statusFlag = ReTry;
     http.end();
-    return 0;
   }
-  return 1;
+  statusFlag = execution;
 }
 
-
-// [任 務/ 執 行 續] GPIOSensor偵測各個感測器
-
-void WatchDog(void * parameter){  
-  while(true){
-    if (statusFlag == ReTry){
-        webhook();
-    }    
-    delay(1500 / portTICK_RATE_MS );
-  }
-}
 // Main_Program_Setup
 void setup() {
 
@@ -519,7 +507,6 @@ void setup() {
   // 開啟 task 執行續
   xTaskCreate( u8g2_Dispaly, "u8g2_Dispaly", 2048, NULL, 0, &tasku8g2_Dispaly);  
   xTaskCreate( GPIOSensor, "GPIOSensor", 8192, NULL, 1, &taskuGPIOSensor);
-  xTaskCreate( WatchDog, "WatchDog", 2048, NULL, 2, &taskWatchDog);
 
   // 呼叫連線
   wifiConnect( );  
