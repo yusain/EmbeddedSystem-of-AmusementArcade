@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-//#include <esp_task_wdt.h>
+#include <esp_task_wdt.h>
 
 #include <WiFiMulti.h>
 #include <WiFi.h>
@@ -53,9 +53,9 @@ U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0,
 // ╔═════════════════╗
 //  網 路 相 關 參 數
 // ╚═════════════════╝
-const char globleWiFiSSID[] = "190-B"; //WiFiSSID
-const char globleWiFiPassword[] = "0927127373"; //WiFiPassword
-String globleServerPath = "http://e3b1-163-13-133-72.ngrok.io/"; //偉中後端伺服器URL
+const char globleWiFiSSID[] = "iPhone"; //WiFiSSID
+const char globleWiFiPassword[] = "511511511"; //WiFiPassword
+String globleServerPath = "http://eea6-163-13-133-72.ngrok.io"; //偉中後端伺服器URL
 
 // ╔═════════════════╗
 //  GPIO 相 關 參 數
@@ -74,10 +74,10 @@ int loopdelay = 1 * 60 * 1000;
 //  GPIO 腳 位 宣 告
 // ╚═════════════════╝
 
-#define  lightPin 39
-#define  DHTPIN   16  // Digital pin connected to the DHT sensor          
-#define  DustPin  36  
-#define  Waterpin 25  
+#define  LightDRPin 39      // Analog pin for LightDR
+#define  DHTPIN   16        // Digital pin connected to the DHT sensor          
+#define  MHsensorPin  36    // Analog pin for MHsensor
+#define  WaterMotorpin 25   // Digital pin for WaterMotor
 
 // ╔════════════════════╗
 //  工 作 執 行 緒 宣 告
@@ -143,13 +143,14 @@ void wifiConnect( void ){
   Serial.print(globleWiFiSSID);
   Serial.print(" Password:");
   Serial.println(globleWiFiPassword);
+  /*
   //WiFiMulti wifiMulti;
   //wifiMulti.h方法
   //wifiMulti.addAP("yusain的iphone", "511511511"); 
   //while (wifiMulti.run() != WL_CONNECTED) {
     //statusFlag = execution;
   //}
-
+  */
   //WiFi.h方法
   WiFi.begin(globleWiFiSSID, globleWiFiPassword);
   
@@ -271,7 +272,7 @@ void u8g2_GPIO(int count) {
   
   // LDR  
   u8g2.setFont(u8g2_font_open_iconic_weather_2x_t);
-  switch (int(globleLDR)/(100/3)) //LDR range:0 ~ 100up
+  switch (int(globleLDR)/(400/3)) //LDR range:0 ~ 100up
   { case 0: IconStatus.LDRIcon = IconCloudy; break;
     case 1: IconStatus.LDRIcon = IconSumCloudy; break;
     case 2: IconStatus.LDRIcon = IconSum; break;  
@@ -316,7 +317,7 @@ void u8g2_StatusFlag(void){
     case Webhook:           SystemStatus = "Webhook..."; break;
     case WebhookSuccess:    SystemStatus = "Webhook Success"; break;
     case Webhookfalse:      SystemStatus = "Webhook false"; break;
-    case ReTry:           SystemStatus = "ReTry"; break;
+    case ReTry:             SystemStatus = "ReTry"; break;
     default:                SystemStatus = ""; break; }
 
   u8g2.setFont(u8g2_font_6x10_tf);
@@ -389,7 +390,7 @@ void DHT11sensor(void){
 // [函  式] Dust Sensor
 void Dust(void){
   // Dust(MHsensor)
-  globleMHsensor = analogRead(DustPin);
+  globleMHsensor = analogRead(MHsensorPin);
   Serial.printf("現在檢測土壤溼度為: %d\n",globleMHsensor);
   Serial.println("-------------------------\n");
 }
@@ -397,7 +398,7 @@ void Dust(void){
 // [函  式] LDR Sensor
 void LDR(void){
   // LDR (light-dependent resistor)
-  globleLDR = analogRead(lightPin);
+  globleLDR = analogRead(LightDRPin);
   Serial.printf("現在檢測光線強度為: %d\n",globleLDR);
   Serial.println("-------------------------\n");
 }
@@ -405,21 +406,21 @@ void LDR(void){
 // [函  式] WaterMotor Sensor
 void WaterMotor(void){
   //WaterMotor(12hours open 5 seconds)
-  digitalWrite(Waterpin, HIGH);    
+  digitalWrite(WaterMotorpin, HIGH);    
   globleWaterMotor = false;
 
   long long Nowtime =  getTimestamp();
   if(Nowtime - lastWaterMotortime > WaterMotortime){
-      digitalWrite(Waterpin, LOW); 
+      digitalWrite(WaterMotorpin, LOW); 
       delay(5000);
-      digitalWrite(Waterpin, HIGH);
+      digitalWrite(WaterMotorpin, HIGH);
       globleWaterMotor = true;  
       Serial.printf("現在檢測水馬達啟動: %d\n",globleWaterMotor);
       Serial.println("-------------------------\n");
       lastWaterMotortime = Nowtime;   }
   else {
       //Serial.printf("距離上次水馬達啟動: %d\n",(Nowtime - lastWaterMotortime));
-      digitalWrite(Waterpin, HIGH);  }
+      digitalWrite(WaterMotorpin, HIGH);  }
 }
 
 // [任 務/ 執 行 續] GPIOSensor偵測各個感測器
@@ -433,7 +434,7 @@ void GPIOSensor(void * parameter){
     WaterMotor();
 
     //delay between measurements
-    delay(delaySensorMS);
+    delay(delaySensorMS); //5*1000);
 
   } 
 }
@@ -487,27 +488,29 @@ int webhook(){
 }
 
 
-// [任 務/ 執 行 續] GPIOSensor偵測各個感測器
-
+// [任 務/ 執 行 續] WatchDog偵測webhook狀態
+//#define WDT_TIMEOUT 3
 void WatchDog(void * parameter){  
   while(true){
+    //esp_task_wdt_reset();
     if (statusFlag == ReTry){
         webhook();
     }    
     delay(1500 / portTICK_RATE_MS );
   }
 }
+
 // Main_Program_Setup
 void setup() {
 
   Serial.begin(115200);
 
   // Initialize PINSet         
-  pinMode(Waterpin, OUTPUT);    
-  pinMode(DustPin,INPUT);
-  pinMode(lightPin,INPUT);  
+  pinMode(WaterMotorpin, OUTPUT);    
+  pinMode(MHsensorPin,INPUT);
+  pinMode(LightDRPin,INPUT);  
  
-  digitalWrite(Waterpin, HIGH);  //水馬達初始化
+  digitalWrite(MHsensorPin, HIGH);  //水馬達初始化
   
   // Initialize device and Set delay between sensor readings
   u8g2.begin();
@@ -520,6 +523,9 @@ void setup() {
   xTaskCreate( u8g2_Dispaly, "u8g2_Dispaly", 2048, NULL, 0, &tasku8g2_Dispaly);  
   xTaskCreate( GPIOSensor, "GPIOSensor", 8192, NULL, 1, &taskuGPIOSensor);
   xTaskCreate( WatchDog, "WatchDog", 2048, NULL, 2, &taskWatchDog);
+
+  //esp_task_wdt_init(WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+  //esp_task_wdt_add(&taskWatchDog); //add current thread to WDT watch
 
   // 呼叫連線
   wifiConnect( );  
